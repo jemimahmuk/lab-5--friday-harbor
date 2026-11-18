@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Friday Harbor: Soundscape and Visualscape</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header>
+    <h1>&#9875; Friday Harbor, Washington &#9875;</h1>
+    <p>A soundscape of San Juan Island. Press play and watch the harbor respond to the sounds.</p>
+  </header>
+
+  <main>
+    <!-- Part B: the visualscape. The scene is an inline SVG so JavaScript can move each piece. -->
+    <div id="scene-box">
+      <svg id="scene" viewBox="0 0 800 450" role="img" aria-label="Illustration of Friday Harbor with a ferry, sailboats, a gull, a bell buoy and an orca">
+        <defs>
+          <linearGradient id="water-grad" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#7cc4e8"/>
+            <stop offset="1" stop-color="#4a9cc6"/>
+          </linearGradient>
+        </defs>
+
+        <!-- Sky and sun (JavaScript changes their color and position) -->
+        <rect id="sky" width="800" height="245" fill="#bfe6ff"/>
+        <circle id="sun" cx="80" cy="190" r="30" fill="#ffe066"/>
+
+        <g id="layer-clouds">
+          <g class="cloud-drift" fill="#fff" opacity="0.9">
+            <ellipse cx="560" cy="60" rx="45" ry="16"/><ellipse cx="590" cy="50" rx="30" ry="14"/>
+            <ellipse cx="300" cy="90" rx="40" ry="13"/><ellipse cx="325" cy="82" rx="26" ry="11"/>
+          </g>
+        </g>
+
+        <!-- Distant islands and mountain -->
+        <g id="layer-far">
+          <path d="M120 245 L230 140 L340 245 Z" fill="#d7e3f0"/>
+          <path d="M200 170 L230 140 L260 170 L245 162 L230 174 L215 162 Z" fill="#fff"/>
+          <path d="M0 245 Q80 200 170 230 Q250 208 330 245 Z" fill="#8fb8a8"/>
+          <path d="M300 245 Q400 208 520 245 Z" fill="#7fae9c"/>
+        </g>
+
+        <rect y="240" width="800" height="210" fill="url(#water-grad)"/>
+
+        <!-- Waves (they only move while the audio is playing) -->
+        <g fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round">
+          <path class="wave wave-1" opacity="0.5" d="M0 275 q25 -10 50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0"/>
+          <path class="wave wave-2" opacity="0.4" d="M0 325 q25 -10 50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0"/>
+          <path class="wave wave-1" opacity="0.4" d="M0 395 q25 -10 50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0 t50 0"/>
+        </g>
+
+        <!-- The town on the hill -->
+        <g id="layer-town">
+          <path d="M470 326 Q600 150 800 170 L800 326 Z" fill="#6fae6a"/>
+          <g fill="#2f7d4f">
+            <path d="M540 262 l14 -36 l14 36 Z"/><path d="M572 246 l12 -32 l12 32 Z"/>
+            <path d="M700 214 l12 -32 l12 32 Z"/><path d="M780 200 l12 -32 l12 32 Z"/>
+          </g>
+          <g>
+            <rect x="605" y="222" width="26" height="20" fill="#ffd6a5"/><path d="M602 222 l16 -12 l16 12 Z" fill="#e76f51"/>
+            <rect x="642" y="205" width="26" height="20" fill="#cdeac0"/><path d="M639 205 l16 -12 l16 12 Z" fill="#c1272d"/>
+            <rect x="682" y="196" width="26" height="20" fill="#fdffb6"/><path d="M679 196 l16 -12 l16 12 Z" fill="#8d5a3a"/>
+            <rect x="730" y="186" width="26" height="20" fill="#bde0fe"/><path d="M727 186 l16 -12 l16 12 Z" fill="#e76f51"/>
+          </g>
+        </g>
+
+        <!-- The ferry: JavaScript slides it across the water based on the audio time -->
+        <g id="ferry">
+          <path d="M0 318 L220 318 L205 342 L12 342 Z" fill="#1f6f55"/>
+          <rect x="15" y="292" width="190" height="26" fill="#fff"/>
+          <rect x="35" y="270" width="150" height="22" fill="#f2f2f2"/>
+          <line x1="22" y1="305" x2="198" y2="305" stroke="#5fb3d9" stroke-width="8" stroke-dasharray="10 6"/>
+          <line x1="42" y1="281" x2="178" y2="281" stroke="#5fb3d9" stroke-width="8" stroke-dasharray="10 6"/>
+          <rect x="95" y="248" width="26" height="24" fill="#e8e8e8"/>
+          <rect x="95" y="252" width="26" height="6" fill="#1f6f55"/>
+          <rect x="140" y="258" width="36" height="14" fill="#fff"/>
+          <text id="horn-text" x="60" y="236" font-size="26" font-weight="bold" fill="#c1272d">HOOONK!</text>
+        </g>
+
+        <!-- Dock and pilings -->
+        <g>
+          <rect x="480" y="322" width="320" height="12" fill="#a9743f"/>
+          <g fill="#7a5230">
+            <rect x="488" y="322" width="8" height="26"/><rect x="560" y="322" width="8" height="26"/>
+            <rect x="640" y="322" width="8" height="26"/><rect x="720" y="322" width="8" height="26"/>
+          </g>
+        </g>
+
+        <!-- Gull on a piling (click it!) -->
+        <g transform="translate(492 314)" class="clickable" id="gull">
+          <title>Click the gull</title>
+          <g class="gull-inner">
+            <ellipse cx="0" cy="0" rx="10" ry="5" fill="#fff"/>
+            <circle cx="9" cy="-5" r="4" fill="#fff"/>
+            <path d="M12 -6 L18 -4 L12 -3 Z" fill="#ff9f1c"/>
+            <path d="M-10 0 L-17 -3 L-10 3 Z" fill="#dfe6ee"/>
+            <path class="wings" d="M-4 -2 Q-2 -15 -15 -13 Q-8 -5 -4 -2 Z" fill="#dfe6ee"/>
+            <circle cx="10" cy="-6" r="1" fill="#222"/>
+          </g>
+        </g>
+
+        <!-- Sailboats (click to change the sail color) -->
+        <g transform="translate(600 352)" class="clickable" id="boat1">
+          <title>Click the sailboat</title>
+          <g class="boat bob">
+            <path d="M-28 0 L28 0 L20 12 L-20 12 Z" fill="#fff"/>
+            <rect x="-1" y="-55" width="2" height="55" fill="#7a5230"/>
+            <path class="sail" d="M3 -52 L3 -6 L30 -6 Z" fill="#ff8fab"/>
+            <path d="M-3 -48 L-3 -6 L-24 -6 Z" fill="#fff"/>
+          </g>
+        </g>
+        <g transform="translate(715 356)" class="clickable" id="boat2">
+          <title>Click the sailboat</title>
+          <g class="boat bob">
+            <path d="M-28 0 L28 0 L20 12 L-20 12 Z" fill="#e76f51"/>
+            <rect x="-1" y="-55" width="2" height="55" fill="#7a5230"/>
+            <path class="sail" d="M3 -52 L3 -6 L30 -6 Z" fill="#ffe066"/>
+            <path d="M-3 -48 L-3 -6 L-24 -6 Z" fill="#fff"/>
+          </g>
+        </g>
+
+        <!-- Bell buoy (click to ring it) -->
+        <g transform="translate(300 372)" class="clickable" id="buoy">
+          <title>Click the bell buoy</title>
+          <g class="buoy-inner">
+            <path d="M-18 14 L18 14 L10 -10 L-10 -10 Z" fill="#e63946"/>
+            <rect x="-14" y="0" width="28" height="6" fill="#fff"/>
+            <path d="M-8 -10 L0 -34 L8 -10" stroke="#555" fill="none" stroke-width="3"/>
+            <circle cx="0" cy="-24" r="5" fill="#ffd36b"/>
+          </g>
+        </g>
+
+        <!-- Orca (click to make it surface) -->
+        <g transform="translate(150 300)" class="clickable" id="orca">
+          <title>Click the orca</title>
+          <g class="orca-inner">
+            <g class="spout" id="spout" fill="#fff" opacity="0">
+              <circle cx="-30" cy="-16" r="5"/><circle cx="-34" cy="-27" r="7"/><circle cx="-27" cy="-40" r="9"/>
+            </g>
+            <path d="M-40 0 Q-10 -12 30 0 Q-10 9 -40 0 Z" fill="#222"/>
+            <path d="M-4 -5 L2 -32 L15 -2 Z" fill="#222"/>
+            <ellipse cx="-30" cy="-2" rx="5" ry="2" fill="#fff"/>
+          </g>
+        </g>
+      </svg>
+    </div>
+
+    <p id="caption">Press play to begin.</p>
+
+    <!-- Media controls -->
+    <div id="controls">
+      <button id="play-btn">&#9654; Play</button>
+      <span id="time">0:00 / 1:20</span>
+      <input id="seek" type="range" min="0" max="80" step="0.1" value="0" aria-label="Seek">
+      <label>&#128266; <input id="volume" type="range" min="0" max="1" step="0.05" value="0.8" aria-label="Volume"></label>
+    </div>
+
+    <h2>Jump to a moment</h2>
+    <div id="chapters"></div>
+
+    <p class="hint">Click the gull, the sailboats, the bell buoy and the orca. Move your mouse over the scene to shift the view. Press the space bar to play or pause.</p>
+
+    <section id="about">
+      <h2>About this place</h2>
+      <p>Friday Harbor is the main town on San Juan Island in Washington State. Most visitors arrive on a
+         Washington State ferry from Anacortes. The harbor is full of sailboats, and the waters around the
+         island are known for orcas. This soundscape imagines a day at the harbor: waves, gulls, the ferry,
+         rigging in the wind, a bell buoy and an orca surfacing.</p>
+       
+    </section>
+  </main>
+
+  <!-- Part A: the audio. The main soundscape plus three short sound effects for clicking. -->
+  <audio id="soundscape" src="assets/soundscape.mp3" preload="auto"></audio>
+  <audio id="gull-sound" src="assets/gull.mp3" preload="auto"></audio>
+  <audio id="bell-sound" src="assets/bell.mp3" preload="auto"></audio>
+  <audio id="orca-sound" src="assets/orca.mp3" preload="auto"></audio>
+
+  <script src="script.js"></script>
+</body>
+</html>
